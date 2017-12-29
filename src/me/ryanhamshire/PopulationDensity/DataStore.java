@@ -444,8 +444,7 @@ public class DataStore implements TabCompleter
 		return this.nameToCoordsMap.get(regionName.toLowerCase());
 	}
 	
-	//actually edits the world to create a region post at the center of the specified region	
-	@SuppressWarnings("deprecation")
+	//actually edits the world to create a region post at the center of the specified region
     public void AddRegionPost(RegionCoordinates region) throws ChunkLoadException
 	{
 		//if region post building is disabled, don't do anything
@@ -602,21 +601,6 @@ public class DataStore implements TabCompleter
 		
 		sign.update();
 		
-		//if a city world is defined, also add a /cityregion sign on the east side of the post
-		if(PopulationDensity.CityWorld != null)
-		{
-			block = PopulationDensity.ManagedWorld.getBlockAt(x, y + 3, z - 1);
-			
-			//signData = new org.bukkit.material.Sign(Material.WALL_SIGN);
-			//signData.setFacingDirection(BlockFace.NORTH);
-			
-			//block.setTypeIdAndData(Material.WALL_SIGN.getId(), signData.getData(), false);
-			
-			//sign = (org.bukkit.block.Sign)block.getState();
-			
-			//sign.update();
-		}
-		
 		//add a sign for the region to the east
 		regionName = this.getRegionName(new RegionCoordinates(region.x, region.z - 1));
 		if(regionName == null) regionName = "Wilderness";
@@ -718,21 +702,6 @@ public class DataStore implements TabCompleter
         sign.setLine(3, "<--");
 		
 		sign.update();
-		
-		//if teleportation is enabled, also add a sign facing west for /newestregion
-		if(PopulationDensity.instance.allowTeleportation && !this.openRegionCoordinates.equals(region))
-		{
-			//block = PopulationDensity.ManagedWorld.getBlockAt(x, y + 3, z + 1);
-
-			//signData = new org.bukkit.material.Sign(Material.WALL_SIGN);
-			//signData.setFacingDirection(BlockFace.SOUTH);
-			
-			//block.setTypeIdAndData(Material.WALL_SIGN.getId(), signData.getData(), false);
-
-			//sign = (org.bukkit.block.Sign)block.getState();
-			
-			//sign.update();
-		}
 		
 		//custom signs
 		
