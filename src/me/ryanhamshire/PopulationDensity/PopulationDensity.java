@@ -835,6 +835,30 @@ public class PopulationDensity extends JavaPlugin
 			
 			return true;
 		}
+
+		else if(cmd.getName().equalsIgnoreCase("uninvite") && player != null)
+		{
+			if(args.length < 1) return false;
+
+			//send a notification to the invitee, if he's available
+			Player invitee = this.getServer().getPlayer(args[0]);
+			if(invitee != null)
+			{
+				playerData = this.dataStore.getPlayerData(invitee);
+				if(playerData.inviter == player)
+				{
+					//PopulationDensity.sendMessage(player, TextMode.Success, Messages.InviteAlreadySent, invitee.getName(), player.getName());
+					player.sendMessage(ChatColor.GREEN + invitee.getName() + " has been uninvited.");
+					return true;
+				}
+			}
+			else
+			{
+				PopulationDensity.sendMessage(player, TextMode.Err, Messages.PlayerNotFound, args[0]);
+			}
+
+			return true;
+		}
 		
 		else if(cmd.getName().equalsIgnoreCase("sendregion"))
         {
