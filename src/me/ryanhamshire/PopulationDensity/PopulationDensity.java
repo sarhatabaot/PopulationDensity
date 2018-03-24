@@ -848,6 +848,7 @@ public class PopulationDensity extends JavaPlugin
 				if(playerData.inviter == player)
 				{
 					//PopulationDensity.sendMessage(player, TextMode.Success, Messages.InviteAlreadySent, invitee.getName(), player.getName());
+					playerData.inviter = null;
 					player.sendMessage(ChatColor.GREEN + invitee.getName() + " has been uninvited.");
 					return true;
 				}
