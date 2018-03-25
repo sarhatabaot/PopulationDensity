@@ -51,7 +51,11 @@ commands:
    invite:
       description: Invites a player to visit your home region.
       usage: /invite <player name>
-      alises: [invitetoregion, regioninvite, inviteregion]
+      aliases: [invitetoregion, regioninvite, inviteregion]
+   uninvite:
+      description: Uninvites a player who was previously invited.
+      usage: /invite <player name>
+      aliases: [deinvite]
    loginpriority:
       description: Sets the login priority for a player.
       usage: /LoginPriority <player name> <priority, 0 - 100>
