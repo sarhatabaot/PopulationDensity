@@ -36,181 +36,20 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 public class PlayerEventHandler implements Listener {
 	private DataStore dataStore;
-	PopulationDensity instance;
+	private PopulationDensity instance;
 
-	// queue of players waiting to join the server
-	public ArrayList<LoginQueueEntry> loginQueue = new ArrayList<LoginQueueEntry>();
-
-	// typical constructor, yawn
 	public PlayerEventHandler(DataStore dataStore, PopulationDensity plugin) {
 		this.dataStore = dataStore;
 		instance = plugin;
 	}
 
-	// when a player attempts to join the server...
-	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-	public void onPlayerLoginEvent(PlayerLoginEvent event)
-	{
-		if (!PopulationDensity.instance.enableLoginQueue)
-			return;
-
-		if (event.getResult() != Result.ALLOWED)
-			return;
-
-		Player player = event.getPlayer();
-		PlayerData playerData = this.dataStore.getPlayerData(player);
-		/*
-		 * PopulationDensity.AddLogEntry("");
-		 * PopulationDensity.AddLogEntry("QUEUE STATUS================");
-		 * PopulationDensity.AddLogEntry("");
-		 * 
-		 * for(int i = 0; i < this.loginQueue.size(); i++) { LoginQueueEntry
-		 * entry = this.loginQueue.get(i); DateFormat timeFormat =
-		 * DateFormat.getTimeInstance(DateFormat.SHORT);
-		 * PopulationDensity.AddLogEntry("\t" + entry.playerName + " " +
-		 * entry.priority + " " + timeFormat.format((new
-		 * Date(entry.lastRefreshed)))); }
-		 * 
-		 * PopulationDensity.AddLogEntry("");
-		 * PopulationDensity.AddLogEntry("END QUEUE STATUS================");
-		 * PopulationDensity.AddLogEntry("");
-		 * 
-		 * PopulationDensity.AddLogEntry("attempting to log in " +
-		 * player.getName());
-		 */
-
-		@SuppressWarnings("unchecked")
-        Collection<Player> playersOnline = (Collection<Player>)PopulationDensity.instance.getServer().getOnlinePlayers();
-		int totalSlots = PopulationDensity.instance.getServer().getMaxPlayers();
-
-		// determine player's effective priority
-		int effectivePriority = playerData.loginPriority;
-
-		// PopulationDensity.AddLogEntry("\tlogin priority " +
-		// playerData.loginPriority);
-
-		// if the player last disconnected within the last two minutes, treat
-		// the player with very high priority
-		Calendar twoMinutesAgo = Calendar.getInstance();
-		twoMinutesAgo.add(Calendar.MINUTE, -2);
-		if (playerData.lastDisconnect.compareTo(twoMinutesAgo.getTime()) == 1 && playerData.loginPriority < 99) {
-			effectivePriority = 99;
-		}
-
-		// cap priority at 100
-		if (effectivePriority > 100)
-			effectivePriority = 100;
-
-		// PopulationDensity.AddLogEntry("\teffective priority " +
-		// effectivePriority);
-
-		// if the player has maximum priority
-		if (effectivePriority > 99) {
-			// PopulationDensity.AddLogEntry("\thas admin level priority");
-
-			// if there's room, log him in without consulting the queue
-			if (playersOnline.size() <= totalSlots - 2) {
-				// PopulationDensity.AddLogEntry("\tserver has room, so instant login");
-				return;
-			}
-		}
-
-		// scan the queue for the player, removing any expired queue entries
-		long nowTimestamp = Calendar.getInstance().getTimeInMillis();
-
-		int queuePosition = -1;
-		for (int i = 0; i < this.loginQueue.size(); i++) {
-			LoginQueueEntry entry = this.loginQueue.get(i);
-
-			// if this entry has expired, remove it
-			if ((nowTimestamp - entry.lastRefreshed) > 180000 /* three minutes */) {
-				// PopulationDensity.AddLogEntry("\t\tremoved expired entry for "
-				// + entry.playerName);
-				this.loginQueue.remove(i--);
-			}
-
-			// otherwise compare the name in the entry
-			else if (entry.playerName.equals(player.getName())) {
-				queuePosition = i;
-				// PopulationDensity.AddLogEntry("\t\trefreshed existing entry at position "
-				// + queuePosition);
-				entry.lastRefreshed = nowTimestamp;
-				break;
-			}
-		}
-
-		// if not in the queue, find the appropriate place in the queue to
-		// insert
-		if (queuePosition == -1) {
-			// PopulationDensity.AddLogEntry("\tnot in the queue ");
-			if (this.loginQueue.size() == 0) {
-				// PopulationDensity.AddLogEntry("\tqueue empty, will insert in position 0");
-				queuePosition = 0;
-			} else {
-				// PopulationDensity.AddLogEntry("\tsearching for best place based on rank");
-				for (int i = this.loginQueue.size() - 1; i >= 0; i--) {
-					LoginQueueEntry entry = this.loginQueue.get(i);
-
-					if (entry.priority >= effectivePriority) {
-						queuePosition = i + 1;
-						// PopulationDensity.AddLogEntry("\tinserting in position"
-						// + queuePosition + " behind " + entry.playerName +
-						// ", pri " + entry.priority);
-						break;
-					}
-				}
-
-				if (queuePosition == -1)
-					queuePosition = 0;
-			}
-
-			this.loginQueue.add(queuePosition,
-					new LoginQueueEntry(player.getName(), effectivePriority,
-							nowTimestamp));
-		}
-
-		// PopulationDensity.AddLogEntry("\tplayer count " +
-		// playersOnline.length + " / " + totalSlots);
-
-		// if the player can log in
-		if (totalSlots - 1 - playersOnline.size()
-				- PopulationDensity.instance.reservedSlotsForAdmins > queuePosition) {
-			// PopulationDensity.AddLogEntry("\tcan log in now, removed from queue");
-
-			// remove from queue
-			this.loginQueue.remove(queuePosition);
-
-			// allow login
-			return;
-		}
-
-		else {
-			// otherwise, kick, notify about position in queue, and give
-			// instructions
-			// PopulationDensity.AddLogEntry("\tcant log in yet");
-			event.setResult(Result.KICK_FULL);
-			String kickMessage = PopulationDensity.instance.queueMessage;
-			kickMessage = kickMessage.replace("%queuePosition%",
-					String.valueOf(queuePosition + 1));
-			kickMessage = kickMessage.replace("%queueLength%",
-					String.valueOf(this.loginQueue.size()));
-			event.setKickMessage(kickMessage);
-//			event.setKickMessage(""
-//					+ (queuePosition + 1)
-//					+ " of "
-//					+ this.loginQueue.size()
-//					+ " in queue.  Reconnect within 3 minutes to keep your place.  :)");
-			event.disallow(event.getResult(), event.getKickMessage());
-		}
-	}
-
 	// when a player successfully joins the server...
 	@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-	public void onPlayerJoin(PlayerJoinEvent event) {
+	private void onPlayerJoin(PlayerJoinEvent event) {
 		
 		Player joiningPlayer = event.getPlayer();
 		
-		PopulationDensity.instance.resetIdleTimer(joiningPlayer);
+		instance.resetIdleTimer(joiningPlayer);
 		
 		PlayerData playerData = this.dataStore.getPlayerData(joiningPlayer);
 		if (playerData.lastObservedLocation == null) {
@@ -265,7 +104,7 @@ public class PlayerEventHandler implements Listener {
 		        
 		        if(playerData.homeRegion == null)
 		        {
-		            playerData.homeRegion = PopulationDensity.instance.dataStore.getOpenRegion();
+		            playerData.homeRegion = instance.dataStore.getOpenRegion();
 		        }
 		    }
 		    
@@ -275,7 +114,7 @@ public class PlayerEventHandler implements Listener {
 
 	// when a player disconnects...
 	@EventHandler(ignoreCancelled = true)
-	public void onPlayerQuit(PlayerQuitEvent event)
+	private void onPlayerQuit(PlayerQuitEvent event)
 	{
 		this.onPlayerDisconnect(event.getPlayer());
 	}
@@ -288,30 +127,11 @@ public class PlayerEventHandler implements Listener {
 		// note logout timestamp
 		playerData.lastDisconnect = Calendar.getInstance().getTime();
 		
-		//note login priority based on permissions
-		// assert permission-based priority
-		if (player.hasPermission("populationdensity.prioritylogin")
-				&& playerData.loginPriority < 25) {
-			playerData.loginPriority = 25;
-		}
-
-		if (player.hasPermission("populationdensity.elitelogin")
-				&& playerData.loginPriority < 50) {
-			playerData.loginPriority = 50;
-		}
-
-		// if the player has kicktologin permission, treat the player with
-		// highest priority
-		if (player.hasPermission("populationdensity.adminlogin")) {
-			// PopulationDensity.AddLogEntry("\tcan fill administrative slots");
-			playerData.loginPriority = 100;
-		}
-		
 		this.dataStore.savePlayerData(player, playerData);
 
 		// cancel any existing afk check task
 		if (playerData.afkCheckTaskID >= 0) {
-			PopulationDensity.instance.getServer().getScheduler()
+			instance.getServer().getScheduler()
 					.cancelTask(playerData.afkCheckTaskID);
 			playerData.afkCheckTaskID = -1;
 		}
@@ -322,9 +142,9 @@ public class PlayerEventHandler implements Listener {
 
 	// when a player respawns after death...
 	@EventHandler(ignoreCancelled = true)
-	public void onPlayerRespawn(PlayerRespawnEvent respawnEvent)
+	private void onPlayerRespawn(PlayerRespawnEvent respawnEvent)
 	{
-		if (!PopulationDensity.instance.respawnInHomeRegion)
+		if (!instance.respawnInHomeRegion)
 		{
 		    if(PopulationDensity.ManagedWorld == respawnEvent.getRespawnLocation().getWorld())
 		    {
@@ -355,11 +175,11 @@ public class PlayerEventHandler implements Listener {
 	}
 	
 	@EventHandler(ignoreCancelled = true)
-    public synchronized void onPlayerChat(AsyncPlayerChatEvent event)
+    private void onPlayerChat(AsyncPlayerChatEvent event)
     {
         String msg = event.getMessage();
 
-		if(msg.equalsIgnoreCase(PopulationDensity.instance.dataStore.getMessage(Messages.Lag)))
+		if(msg.equalsIgnoreCase(instance.dataStore.getMessage(Messages.Lag)))
 		{
 			final Player player = event.getPlayer();
 
@@ -370,19 +190,9 @@ public class PlayerEventHandler implements Listener {
 			{
 				public void run()
 				{
-					PopulationDensity.instance.reportTPS(player);
+					instance.reportTPS(player);
 				}
 			}.runTask(instance);
 		}
     }
-	
-	@EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
-	public void onPlayerInteractEntity(PlayerInteractEntityEvent event)
-	{
-	    Entity entity = event.getRightClicked();
-        if(entity instanceof Animals || entity instanceof Minecart)
-	    {
-	        entity.setTicksLived(1);
-	    }
-	}
 }
