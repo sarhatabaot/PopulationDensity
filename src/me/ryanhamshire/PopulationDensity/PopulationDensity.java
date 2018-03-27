@@ -52,8 +52,6 @@ public class PopulationDensity extends JavaPlugin
 {
 	//for convenience, a reference to the instance of this plugin
 	public static PopulationDensity instance;
-
-	DropShipTeleporter dropShipTeleporterInstance;
 	
 	//for logging to the console and log file
 	//Um wat why are we using the Minecraft logger... Oh shoot static is everywhere here :(
@@ -460,13 +458,6 @@ public class PopulationDensity extends JavaPlugin
 		//world events, to generate region posts when chunks load
 		WorldEventHandler worldEventHandler = new WorldEventHandler();
 		pluginManager.registerEvents(worldEventHandler, this);
-
-		//Only load listeners if LaunchAndDrop is enabled in config
-		if (config_launchAndDropPlayers || config_launchAndDropNewPlayers)
-		{
-			this.dropShipTeleporterInstance = new DropShipTeleporter(this);
-			pluginManager.registerEvents(dropShipTeleporterInstance, this);
-		}
 		
 		//make a note of the spawn world.  may be NULL if the configured city world name doesn't match an existing world
 		CityWorld = this.getServer().getWorld(this.cityWorldName);
@@ -594,75 +585,7 @@ public class PopulationDensity extends JavaPlugin
 			playerData = this.dataStore.getPlayerData(player);
 		}
 		
-		if(cmd.getName().equalsIgnoreCase("visit") && player != null)
-		{			
-		    if(args.length < 1) return false;
-			
-			CanTeleportResult result = this.playerCanTeleport(player, false);
-		    if(!result.canTeleport) return true;
-			
-			@SuppressWarnings("deprecation")
-            Player targetPlayer = this.getServer().getPlayerExact(args[0]);
-			if(targetPlayer != null)
-			{
-			    PlayerData targetPlayerData = this.dataStore.getPlayerData(targetPlayer);
-			    if(playerData.inviter != null && playerData.inviter.getName().equals(targetPlayer.getName()))
-			    {
-			        if(result.nearPost && this.launchPlayer(player))
-			        {
-			            this.TeleportPlayer(player, targetPlayerData.homeRegion, 1);
-			        }
-			        else
-			        {
-			            this.TeleportPlayer(player, targetPlayerData.homeRegion, 0);
-			        }
-			        
-			    }
-			    else if(this.dataStore.getRegionName(targetPlayerData.homeRegion) == null)
-			    {
-			        PopulationDensity.sendMessage(player, TextMode.Err, Messages.InvitationNeeded, targetPlayer.getName());
-			        return true;
-			    }
-			    else
-			    {
-			        if(this.launchPlayer(player))
-                    {
-                        this.TeleportPlayer(player, targetPlayerData.homeRegion, 1);
-                    }
-                    else
-                    {
-                        this.TeleportPlayer(player, targetPlayerData.homeRegion, 0);
-                    }
-			    }
-			    
-			    PopulationDensity.sendMessage(player, TextMode.Success, Messages.VisitConfirmation, targetPlayer.getName());
-			}
-			else
-			{
-			    //find the specified region, and send an error message if it's not found
-			    String name = PopulationDensity.join(args);
-			    RegionCoordinates region = this.dataStore.getRegionCoordinates(name);									
-    			if(region == null)
-    			{
-    				PopulationDensity.sendMessage(player, TextMode.Err, Messages.DestinationNotFound, name);
-    				return true;
-    			}
-    			
-    			//otherwise, teleport the user to the specified region					
-    			if(this.launchPlayer(player))
-                {
-                    this.TeleportPlayer(player, region, 1);
-                }
-                else
-                {
-                    this.TeleportPlayer(player, region, 0);
-                }
-			}
-			
-			return true;
-		} 
-		
-		else if(cmd.getName().equalsIgnoreCase("newestregion") && player != null)
+		if(cmd.getName().equalsIgnoreCase("newestregion") && player != null)
 		{
 			//check permission, if necessary
 			if(this.newestRegionRequiresPermission && !player.hasPermission("populationdensity.newestregion"))
@@ -743,95 +666,6 @@ public class PopulationDensity extends JavaPlugin
 			    this.dataStore.AddRegionPost(currentRegion);
 			}
 			catch(ChunkLoadException e) {}  //ignore.  post will be auto-built when the chunk is loaded later
-			
-			return true;
-		}
-		
-		else if(cmd.getName().equalsIgnoreCase("homeregion") && player != null)
-		{
-		    return this.handleHomeCommand(player, playerData);
-		}
-		
-		else if(cmd.getName().equalsIgnoreCase("cityregion") && player != null)
-		{
-			//if city world isn't defined, send the player home
-			if(CityWorld == null)
-			{
-				return this.handleHomeCommand(player, playerData);
-			}
-			
-			//otherwise teleportation is enabled, so consider config, player location, player permissions					
-			CanTeleportResult result = this.playerCanTeleport(player, true);
-			if(result.canTeleport)
-			{
-				Location spawn = CityWorld.getSpawnLocation();
-				
-				Block block = spawn.getBlock();
-				while(block.getType().isSolid())
-				{
-					block = block.getRelative(BlockFace.UP);					
-				}
-				
-				if(result.nearPost && this.launchPlayer(player))
-				    new TeleportPlayerTask(player, block.getLocation(), false, instance).runTaskLater(this, 20L);
-				else
-				    new TeleportPlayerTask(player, block.getLocation(), false, instance).runTaskLater(this, 0L);
-			}
-			
-			return true;
-		}
-		
-		else if(cmd.getName().equalsIgnoreCase("randomregion") && player != null)
-        {
-		    CanTeleportResult result = this.playerCanTeleport(player, false);
-		    if(!result.canTeleport) return true;
-            
-            RegionCoordinates randomRegion = this.dataStore.getRandomRegion(RegionCoordinates.fromLocation(player.getLocation()));
-            
-            if(randomRegion == null)
-            {
-                PopulationDensity.sendMessage(player, TextMode.Err, Messages.NoMoreRegions);
-            }
-            else
-            {           
-                if(result.nearPost && this.launchPlayer(player))
-                {
-                    this.TeleportPlayer(player, randomRegion, 1);
-                }
-                else
-                {
-                    this.TeleportPlayer(player, randomRegion, 0);
-                }
-                
-            }
-            
-            return true;
-        }
-		
-		else if(cmd.getName().equalsIgnoreCase("invite") && player != null)
-		{
-		    if(args.length < 1) return false;
-			
-			//send a notification to the invitee, if he's available
-			@SuppressWarnings("deprecation")
-            Player invitee = this.getServer().getPlayer(args[0]);			
-			if(invitee != null)
-			{
-				playerData = this.dataStore.getPlayerData(invitee);
-				if(playerData.inviter == player)
-				{
-					PopulationDensity.sendMessage(player, TextMode.Success, Messages.InviteAlreadySent, invitee.getName(), player.getName());
-					return true;
-				}
-				playerData.inviter = player;
-				PopulationDensity.sendMessage(player, TextMode.Success, Messages.InviteConfirmation, invitee.getName(), player.getName());
-				PopulationDensity.sendMessage(invitee, TextMode.Success, Messages.InviteNotification, player.getName());		
-				PopulationDensity.sendMessage(invitee, TextMode.Instr, Messages.InviteInstruction, player.getName());
-			}
-			else
-			{
-			    PopulationDensity.sendMessage(player, TextMode.Err, Messages.PlayerNotFound, args[0]);
-			}
 			
 			return true;
 		}
@@ -952,32 +786,6 @@ public class PopulationDensity extends JavaPlugin
 				
 				return true;
 			}
-		}
-		
-		else if(cmd.getName().equalsIgnoreCase("randomregion") && player != null)
-		{
-		    CanTeleportResult result = this.playerCanTeleport(player, false);
-		    if(!result.canTeleport) return true;
-       
-		    RegionCoordinates randomRegion = this.dataStore.getRandomRegion(RegionCoordinates.fromLocation(player.getLocation()));
-       
-		    if(randomRegion == null)
-		    {
-		        PopulationDensity.sendMessage(player, TextMode.Err, Messages.NoMoreRegions);
-		    }
-		    else
-		    {           
-		        if(result.nearPost && this.launchPlayer(player))
-		        {
-		            this.TeleportPlayer(player, randomRegion, 1);
-		        }
-		        else
-		        {
-		            this.TeleportPlayer(player, randomRegion, 0);
-		        }
-		    }
-       
-		    return true;
 		}
 		
 		else if(cmd.getName().equalsIgnoreCase("thinentities"))
