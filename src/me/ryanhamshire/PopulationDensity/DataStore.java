@@ -208,16 +208,6 @@ public class DataStore implements TabCompleter
 			//first line is home region coordinates
 			outStream.write(data.homeRegion.toString());
 			outStream.newLine();
-			
-			//second line is last disconnection date,
-			//note use of the ROOT locale to avoid problems related to regional settings on the server being updated
-			DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, Locale.ROOT);			
-			outStream.write(dateFormat.format(data.lastDisconnect));
-			outStream.newLine();
-			
-			//third line is login priority
-			outStream.write(String.valueOf(data.loginPriority));
-			outStream.newLine();
 		}		
 		
 		//if any problem, log it
@@ -274,45 +264,9 @@ public class DataStore implements TabCompleter
 			//first line is home region coordinates
 			String homeRegionCoordinatesString = inStream.readLine();
 			
-			//second line is date of last disconnection
-			String lastDisconnectedString = inStream.readLine();
-			
-			//third line is login priority
-			String rankString = inStream.readLine(); 
-			
 			//convert string representation of home coordinates to a proper object
 			RegionCoordinates homeRegionCoordinates = new RegionCoordinates(homeRegionCoordinatesString);
 			playerData.homeRegion = homeRegionCoordinates;
-			  
-			//parse the last disconnect date string
-			try
-			{
-				DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.FULL, DateFormat.FULL, Locale.ROOT);
-				Date lastDisconnect = dateFormat.parse(lastDisconnectedString);
-				playerData.lastDisconnect = lastDisconnect;
-			}
-			catch(Exception e)
-			{
-				playerData.lastDisconnect = Calendar.getInstance().getTime();
-			}
-			
-			//parse priority string
-			if(rankString == null || rankString.isEmpty())
-			{
-				playerData.loginPriority = 0;
-			}
-			
-			else
-			{
-				try
-				{
-					playerData.loginPriority = Integer.parseInt(rankString);
-				}
-				catch(Exception e)
-				{
-					playerData.loginPriority = 0;
-				}			
-			}
 			  
 			//shove into memory for quick access
 			this.playerNameToPlayerDataMap.put(dest, playerData);

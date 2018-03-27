@@ -60,8 +60,6 @@ public class BlockEventHandler implements Listener
 	{
 		Player player = breakEvent.getPlayer();
 		
-		PopulationDensity.instance.resetIdleTimer(player);
-		
 		Block block = breakEvent.getBlock();
 		
 		//if the player is not in managed world, do nothing (let vanilla code and other plugins do whatever)
@@ -131,8 +129,6 @@ public class BlockEventHandler implements Listener
 	{
 		Player player = placeEvent.getPlayer();
 		
-		PopulationDensity.instance.resetIdleTimer(player);
-		
 		Block block = placeEvent.getBlock();
 		
 		//if not in managed world, do nothing
@@ -175,20 +171,6 @@ public class BlockEventHandler implements Listener
 		            }
 		        }
 		    }
-		}
-		
-		//if bed or chest and player has not been reminded about /movein this play session
-		if(type == null) type = block.getType();
-		if(type == Material.BED || type == Material.CHEST)
-		{
-			PlayerData playerData = PopulationDensity.instance.dataStore.getPlayerData(player);
-			if(playerData.advertisedMoveInThisSession) return;
-			
-			if(!playerData.homeRegion.equals(blockRegion))
-			{
-				PopulationDensity.sendMessage(player, TextMode.Warn, Messages.BuildingAwayFromHome);
-				playerData.advertisedMoveInThisSession = true;
-			}
 		}
 	}
 	

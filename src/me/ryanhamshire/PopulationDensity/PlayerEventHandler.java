@@ -49,12 +49,7 @@ public class PlayerEventHandler implements Listener {
 		
 		Player joiningPlayer = event.getPlayer();
 		
-		instance.resetIdleTimer(joiningPlayer);
-		
 		PlayerData playerData = this.dataStore.getPlayerData(joiningPlayer);
-		if (playerData.lastObservedLocation == null) {
-			playerData.lastObservedLocation = joiningPlayer.getLocation();
-		}
 
 		// if the player doesn't have a home region yet (he hasn't logged in
 		// since the plugin was installed)
@@ -74,20 +69,8 @@ public class PlayerEventHandler implements Listener {
     
     			// entirely new players who've not visited the server before will
     			// spawn in their home region by default.
-    			// if configured as such, teleport him there after a tick (since we can't teleport in the event tick)
-    			if (instance.newPlayersSpawnInHomeRegion)
-    				new PlaceNewPlayerTask(joiningPlayer, playerData.homeRegion, instance).runTaskLater(instance, 1L);
-    			
-    			// otherwise allow other plugins to control spawning a new player
-    			else
-    			{
-    			    // unless pop density is configured to force a precise world spawn point
-    			    if(instance.preciseWorldSpawn)
-    			        new TeleportPlayerTask(joiningPlayer, joiningPlayer.getWorld().getSpawnLocation(), false, instance).runTaskLater(instance, 1L);
-    			    
-    			    // always remove monsters around the new player's spawn point to prevent ambushes
-    			    PopulationDensity.removeMonstersAround(joiningPlayer.getWorld().getSpawnLocation());
-    			}
+    			// if configured as such, teleport him there after 2 ticks (since we can't teleport in the event tick)
+    				new PlaceNewPlayerTask(joiningPlayer, playerData.homeRegion, instance).runTaskLater(instance, 2L);
 		    }
 		    
 		    //otherwise if he's played before, guess his home region as best we can
@@ -122,21 +105,7 @@ public class PlayerEventHandler implements Listener {
 	// when a player disconnects...
 	private void onPlayerDisconnect(Player player)
 	{
-		PlayerData playerData = this.dataStore.getPlayerData(player);
-
-		// note logout timestamp
-		playerData.lastDisconnect = Calendar.getInstance().getTime();
-		
-		this.dataStore.savePlayerData(player, playerData);
-
-		// cancel any existing afk check task
-		if (playerData.afkCheckTaskID >= 0) {
-			instance.getServer().getScheduler()
-					.cancelTask(playerData.afkCheckTaskID);
-			playerData.afkCheckTaskID = -1;
-		}
-		
-				// clear any cached data for this player in the data store
+		// clear any cached data for this player in the data store
 		this.dataStore.clearCachedPlayerData(player);
 	}
 
