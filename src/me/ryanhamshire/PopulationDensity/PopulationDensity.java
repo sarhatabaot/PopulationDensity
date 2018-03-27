@@ -658,24 +658,6 @@ public class PopulationDensity extends JavaPlugin
             return true;
         }
 		
-		else if(cmd.getName().equalsIgnoreCase("sethomeregion") && player != null)
-		{
-			//if not in the managed world, /movein doesn't make sense
-			if(!player.getWorld().equals(ManagedWorld))
-			{
-			    PopulationDensity.sendMessage(player, TextMode.Err, Messages.NotInRegion);
-				return true;
-			}
-						
-			playerData.homeRegion = RegionCoordinates.fromLocation(player.getLocation());
-			this.dataStore.savePlayerData(player, playerData);
-			PopulationDensity.sendMessage(player, TextMode.Success, Messages.SetHomeConfirmation);
-			PopulationDensity.sendMessage(player, TextMode.Instr, Messages.SetHomeInstruction1);
-			PopulationDensity.sendMessage(player, TextMode.Instr, Messages.SetHomeInstruction2);
-			
-			return true;
-		}
-		
 		else if(cmd.getName().equalsIgnoreCase("addregion") && player != null)
 		{			
 		    PopulationDensity.sendMessage(player, TextMode.Success, Messages.AddRegionConfirmation);
