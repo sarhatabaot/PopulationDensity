@@ -454,9 +454,6 @@ public class PopulationDensity extends JavaPlugin
 		//may open and close several regions before finally leaving an "acceptable" region open
 		//this will repeat every six hours
 		this.getServer().getScheduler().scheduleSyncRepeatingTask(this, new ScanOpenRegionTask(), this.hoursBetweenScans * 60 * 60 * 20L, this.hoursBetweenScans * 60 * 60 * 20L);
-		
-		//start monitoring performance
-		this.getServer().getScheduler().scheduleSyncRepeatingTask(this, new MonitorPerformanceTask(), 1200L, 1200L);
 	}
 
 	String getRegionNameError(String name, boolean console)
@@ -698,34 +695,6 @@ public class PopulationDensity extends JavaPlugin
 			return true;
 		}
 		
-		else if(cmd.getName().equalsIgnoreCase("thinentities"))
-		{
-		    if(player != null)
-		    {
-		        PopulationDensity.sendMessage(player, TextMode.Success, Messages.ThinningConfirmation);
-		    }
-		    
-		    MonitorPerformanceTask.thinEntities();
-		    
-		    return true;
-		}
-		
-		else if(cmd.getName().equalsIgnoreCase("simlag") && player == null)
-        {
-            float tps;
-		    try
-		    {
-		        tps = Float.parseFloat(args[0]);
-		    }
-		    catch(NumberFormatException e)
-		    {
-		        return false;
-		    }
-		    
-		    MonitorPerformanceTask.treatLag(tps);
-            return true;
-        }
-		
 		else if(cmd.getName().equalsIgnoreCase("lag"))
         {
             this.reportTPS(player);
@@ -788,23 +757,9 @@ public class PopulationDensity extends JavaPlugin
 
     void reportTPS(Player player)
 	{
-	    String message = PopulationDensity.instance.dataStore.getMessage(Messages.PerformanceScore, String.valueOf(Math.round((serverTicksPerSecond / 20) * 100)));
-        if(serverTicksPerSecond > 19)
-        {
-            message = PopulationDensity.instance.dataStore.getMessage(Messages.PerformanceScore_NoLag) + message;
-        }
-        else
-        {
-            message += PopulationDensity.instance.dataStore.getMessage(Messages.PerformanceScore_Lag);
-        }
-        
         if(player != null)
         {
-            player.sendMessage(ChatColor.GOLD + message);
-        }
-        else
-        {
-            AddLogEntry(message);
+            player.performCommand("tps");
         }
     }
 

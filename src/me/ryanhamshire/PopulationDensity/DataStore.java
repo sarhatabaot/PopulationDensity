@@ -18,14 +18,12 @@
 
 package me.ryanhamshire.PopulationDensity;
 
-import java.io.*;
-import java.nio.charset.Charset;
-import java.text.DateFormat;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.io.Files;
 import org.apache.commons.lang.Validate;
-import org.bukkit.*;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.command.Command;
@@ -36,8 +34,20 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.io.Files;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DataStore implements TabCompleter
 {
@@ -168,28 +178,6 @@ public class DataStore implements TabCompleter
 		
 		//return total number of regions seen
 		return regionCount;
-	}
-	
-	//picks a region at random (sort of)
-	public RegionCoordinates getRandomRegion(RegionCoordinates regionToAvoid)
-	{
-		if(this.coordsToNameMap.keySet().size() < 2) return null;
-		
-		//initialize random number generator with a seed based the current time
-		Random randomGenerator = new Random();
-		
-		ArrayList<RegionCoordinates> possibleDestinations = new ArrayList<RegionCoordinates>();
-		for(RegionCoordinates coords : this.coordsToNameMap.keySet())
-		{
-		    if(!coords.equals(regionToAvoid))
-		    {
-		        possibleDestinations.add(coords);
-		    }
-		}
-		
-		//pick one of those regions at random
-		int randomRegion = randomGenerator.nextInt(possibleDestinations.size());			
-		return possibleDestinations.get(randomRegion);			
 	}
 	
 	public void savePlayerData(OfflinePlayer player, PlayerData data)

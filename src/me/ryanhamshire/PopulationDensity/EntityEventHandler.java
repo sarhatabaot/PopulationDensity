@@ -109,7 +109,6 @@ public class EntityEventHandler implements Listener
 	
 	//when an item despawns
 	//FEATURE: in the newest region only, regrow trees from fallen saplings
-	@SuppressWarnings("deprecation")
     @EventHandler(ignoreCancelled = true)
 	public void onItemDespawn (ItemDespawnEvent event)
 	{
@@ -156,39 +155,6 @@ public class EntityEventHandler implements Listener
 		if(underBlock.getType() == Material.GRASS || underBlock.getType() == Material.DIRT)
 		{
 			block.setTypeIdAndData(item.getTypeId(), item.getData().getData(), false);
-		}
-	}	
-
-	//RoboMWM - Used solely for resetting the idle timer, may remove(?)
-	@EventHandler(ignoreCancelled = true)
-	public void onEntityDamage (EntityDamageByEntityEvent event)
-	{
-		Player attacker = null;
-		Entity damageSource = event.getDamager();
-		if(damageSource instanceof Player)
-		{
-			attacker = (Player)damageSource;
-		}
-		else if(damageSource instanceof Arrow)
-		{
-			Arrow arrow = (Arrow)damageSource;
-			if(arrow.getShooter() instanceof Player)
-			{
-				attacker = (Player)arrow.getShooter();
-			}
-		}
-		else if(damageSource instanceof ThrownPotion)
-		{
-			ThrownPotion potion = (ThrownPotion)damageSource;
-			if(potion.getShooter() instanceof Player)
-			{
-				attacker = (Player)potion.getShooter();
-			}
-		}
-		
-		if(attacker != null)
-		{
-			PopulationDensity.instance.resetIdleTimer(attacker);
 		}
 	}
 	
@@ -268,7 +234,7 @@ public class EntityEventHandler implements Listener
     				
     				EntityType animalType = null;
     				
-    				//decide what to spawn based on the type of monster
+    				//decide what to spawn based on the type of monster //I'm guessing this a poor man's randomization
     				if(entity.getType() ==  EntityType.CREEPER)
     				{
     				    animalType = EntityType.CHICKEN;
