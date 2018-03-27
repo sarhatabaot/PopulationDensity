@@ -430,10 +430,6 @@ public class PopulationDensity extends JavaPlugin
 		//register for events
 		PluginManager pluginManager = this.getServer().getPluginManager();
 		
-		//set up region name tab completers
-		PluginCommand visitCommand = this.getCommand("visit");
-		visitCommand.setTabCompleter(this.dataStore);
-		
 		//player events, to control spawn, respawn, disconnect, and region-based notifications as players walk around
 		PlayerEventHandler playerEventHandler = new PlayerEventHandler(this.dataStore, this);
 		pluginManager.registerEvents(playerEventHandler, this);
@@ -567,7 +563,7 @@ public class PopulationDensity extends JavaPlugin
 			
 			return true;
 		}
-		
+
 		else if(cmd.getName().equalsIgnoreCase("whichregion") && player != null)
 		{
 			RegionCoordinates currentRegion = RegionCoordinates.fromLocation(player.getLocation());
@@ -576,7 +572,7 @@ public class PopulationDensity extends JavaPlugin
 			    PopulationDensity.sendMessage(player, TextMode.Warn, Messages.NotInRegion);
 				return true;
 			}
-			
+
 			String regionName = this.dataStore.getRegionName(currentRegion);
 			if(regionName == null)
 			{
@@ -584,9 +580,9 @@ public class PopulationDensity extends JavaPlugin
 			}
 			else
 			{
-				PopulationDensity.sendMessage(player, TextMode.Info, Messages.WhichRegion, capitalize(regionName));				
+				PopulationDensity.sendMessage(player, TextMode.Info, Messages.WhichRegion, capitalize(regionName));
 			}
-			
+
 			return true;
 		}
 		

@@ -875,47 +875,4 @@ public class DataStore implements TabCompleter
         
         return builder.toString();
     }
-    
-    @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) throws IllegalArgumentException
-    {
-        Validate.notNull(sender, "Sender cannot be null");
-        Validate.notNull(args, "Arguments cannot be null");
-        Validate.notNull(alias, "Alias cannot be null");
-        if (args.length == 0)
-        {
-                return ImmutableList.of();
-        }
-        
-        StringBuilder builder = new StringBuilder();
-        for(String arg : args)
-        {
-            builder.append(arg + " ");
-        }
-        
-        String arg = builder.toString().trim();
-        ArrayList<String> matches = new ArrayList<String>();
-        for (String name : this.coordsToNameMap.values())
-        {
-            if (StringUtil.startsWithIgnoreCase(name, arg))
-            {
-                matches.add(name);
-            }
-        }
-        
-        Player senderPlayer = sender instanceof Player ? (Player) sender : null;
-        for(Player player : sender.getServer().getOnlinePlayers())
-        {
-            if(senderPlayer == null || senderPlayer.canSee(player))
-            {
-                if(StringUtil.startsWithIgnoreCase(player.getName(), arg))
-                {
-                    matches.add(player.getName());
-                }
-            }
-        }
-        
-        Collections.sort(matches, String.CASE_INSENSITIVE_ORDER);
-        return matches;
-    }
 }
