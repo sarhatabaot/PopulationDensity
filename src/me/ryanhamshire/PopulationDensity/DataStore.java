@@ -454,7 +454,7 @@ public class DataStore
 		{
 			for(int z1 = z - 2; z1 <= z + 2; z1++)
 			{
-				for(int y1 = y + 1; y1 < y + 4; y1++)
+				for(int y1 = y + 1; y1 < y + 5; y1++)
 				{
 					Block block = PopulationDensity.ManagedWorld.getBlockAt(x1, y1, z1);
 					if(block.getType() != Material.AIR) block.setType(Material.AIR);
