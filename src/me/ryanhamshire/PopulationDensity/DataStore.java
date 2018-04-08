@@ -421,7 +421,7 @@ public class DataStore
                 && (block1.getRelative(BlockFace.DOWN).getType() == Material.REDSTONE_ORE
                     || block1.getRelative(BlockFace.DOWN).getType() == Material.GLOWING_REDSTONE_ORE))
 		{
-		    y -= 4;
+		    y -= 5;
 		}
 		else
 		{
