@@ -428,12 +428,6 @@ public class DataStore
 		    return;
 		}
 		
-		//if y value is under sea level, correct it to sea level (no posts should be that difficult to find)
-		if(y < PopulationDensity.instance.minimumRegionPostY)
-		{
-			y = PopulationDensity.instance.minimumRegionPostY;
-		}
-		
 		//clear signs from the area, this ensures signs don't drop as items 
 		//when the blocks they're attached to are destroyed in the next step
 		for(int x1 = x - 2; x1 <= x + 2; x1++)
