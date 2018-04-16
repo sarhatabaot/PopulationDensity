@@ -70,7 +70,6 @@ public class PlayerEventHandler implements Listener {
     			// entirely new players who've not visited the server before will
     			// spawn in their home region by default.
     			// if configured as such, teleport him there after 2 ticks (since we can't teleport in the event tick)
-    				new PlaceNewPlayerTask(joiningPlayer, playerData.homeRegion, instance).runTaskLater(instance, 2L);
 		    }
 		    
 		    //otherwise if he's played before, guess his home region as best we can
