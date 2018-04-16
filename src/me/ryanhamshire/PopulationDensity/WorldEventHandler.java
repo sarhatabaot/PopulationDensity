@@ -74,36 +74,4 @@ public class WorldEventHandler implements Listener
             }
 		}
 	}
-
-    @EventHandler(ignoreCancelled = true)
-    public void onChunkUnload(ChunkUnloadEvent event)
-    {       
-        Chunk chunk = event.getChunk();
-
-        if (!PopulationDensity.instance.config_keepSpawnRegionPostLoaded)
-            return;
-
-        //nothing more to do in worlds other than the managed world
-        if(chunk.getWorld() != PopulationDensity.ManagedWorld) return;
-        
-        //don't allow the new player spawn point chunk to unload
-        //find the boundaries of the chunk
-        Location lesserCorner = chunk.getBlock(0, 0, 0).getLocation();
-        Location greaterCorner = chunk.getBlock(15, 0, 15).getLocation();
-        
-        //if the region is the new player region
-        RegionCoordinates region = RegionCoordinates.fromLocation(lesserCorner);
-        if(region.equals(PopulationDensity.instance.dataStore.getOpenRegion()))
-        {
-            Location regionCenter = PopulationDensity.getRegionCenter(region, false);
-        
-            //if the chunk contains the region center
-            if( regionCenter.getBlockX() >= lesserCorner.getBlockX() && regionCenter.getBlockX() <= greaterCorner.getBlockX() &&
-                    regionCenter.getBlockZ() >= lesserCorner.getBlockZ() && regionCenter.getBlockZ() <= greaterCorner.getBlockZ())
-            {
-                //don't unload the chunk
-                event.setCancelled(true);
-            }
-        }
-    }
 }
