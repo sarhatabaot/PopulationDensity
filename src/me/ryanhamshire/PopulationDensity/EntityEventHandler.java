@@ -18,11 +18,7 @@
 
 package me.ryanhamshire.PopulationDensity;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -31,27 +27,19 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Skeleton;
-import org.bukkit.entity.Spider;
 import org.bukkit.entity.ThrownPotion;
-import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.entity.ItemDespawnEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -68,7 +56,7 @@ public class EntityEventHandler implements Listener
 	        allowedSpawnBlocks = new HashMap<Environment, HashSet<Material>>();
 	    
 	        allowedSpawnBlocks.put(Environment.NORMAL, new HashSet<Material>(Arrays.asList(
-    	        Material.GRASS,
+    	        Material.GRASS_BLOCK,
     	        Material.SAND,
     	        Material.GRAVEL,
     	        Material.STONE,
@@ -80,7 +68,7 @@ public class EntityEventHandler implements Listener
                 Material.NETHER_BRICK)));
     	    
     	    allowedSpawnBlocks.put(Environment.THE_END, new HashSet<Material>(Arrays.asList(
-                Material.ENDER_STONE,
+                Material.END_STONE,
                 Material.OBSIDIAN)));
 	    }
 	    instance = populationDensity;
@@ -106,10 +94,27 @@ public class EntityEventHandler implements Listener
 		
 		//NOTE!  Why not distance?  Because distance squared is cheaper and will be good enough for this.
 	}
+
+	private ArrayList<Material> saplings = new ArrayList<Material>(Arrays.asList(
+			Material.OAK_SAPLING,
+			Material.SPRUCE_SAPLING,
+			Material.BIRCH_SAPLING,
+			Material.JUNGLE_SAPLING,
+			Material.ACACIA_SAPLING,
+			Material.DARK_OAK_SAPLING
+	));
+
+	private ArrayList<Material> logs = new ArrayList<Material>(Arrays.asList(
+			Material.OAK_LOG,
+			Material.SPRUCE_LOG,
+			Material.BIRCH_LOG,
+			Material.JUNGLE_LOG,
+			Material.ACACIA_LOG,
+			Material.DARK_OAK_LOG
+	));
 	
 	//when an item despawns
 	//FEATURE: in the newest region only, regrow trees from fallen saplings
-	@SuppressWarnings("deprecation")
     @EventHandler(ignoreCancelled = true)
 	public void onItemDespawn (ItemDespawnEvent event)
 	{
@@ -126,14 +131,14 @@ public class EntityEventHandler implements Listener
 		ItemStack item = ((Item)entity).getItemStack();
 		
 		//only care about saplings
-		if(item.getType() != Material.SAPLING) return;
+		if(saplings.contains(item.getType())) return;
 		
 		//only care about the newest region
 		if(!PopulationDensity.instance.dataStore.getOpenRegion().equals(RegionCoordinates.fromLocation(entity.getLocation()))) return;
 		
 		//only replace these blocks with saplings
 		Block block = entity.getLocation().getBlock();
-		if(block.getType() != Material.AIR && block.getType() != Material.LONG_GRASS && block.getType() != Material.SNOW) return;
+		if(block.getType() != Material.AIR && block.getType() != Material.TALL_GRASS && block.getType() != Material.SNOW) return;
 		
 		//don't plant saplings next to other saplings or logs
 		Block [] neighbors = new Block [] { 				
@@ -148,14 +153,14 @@ public class EntityEventHandler implements Listener
 		
 		for(int i = 0; i < neighbors.length; i++)
 		{
-			if(neighbors[i].getType() == Material.SAPLING || neighbors[i].getType() == Material.LOG) return;
+			if(saplings.contains(neighbors[i].getType()) || logs.contains(neighbors[i].getType())) return;
 		}
 		
 		//only plant trees in grass or dirt
 		Block underBlock = block.getRelative(BlockFace.DOWN);
-		if(underBlock.getType() == Material.GRASS || underBlock.getType() == Material.DIRT)
+		if(underBlock.getType() == Material.GRASS_BLOCK || underBlock.getType() == Material.DIRT)
 		{
-			block.setTypeIdAndData(item.getTypeId(), item.getData().getData(), false);
+			block.setType(item.getType());
 		}
 	}	
 
@@ -255,7 +260,7 @@ public class EntityEventHandler implements Listener
     			
     			//if it's on grass, there's a 1/100 chance it will also spawn a group of animals
     			Block underBlock = event.getLocation().getBlock().getRelative(BlockFace.DOWN);
-    			if(underBlock.getType() == Material.GRASS && --this.respawnAnimalCounter == 0)
+    			if(underBlock.getType() == Material.GRASS_BLOCK && --this.respawnAnimalCounter == 0)
     			{
     				this.respawnAnimalCounter = 5;
     				
@@ -303,8 +308,7 @@ public class EntityEventHandler implements Listener
     		}
 		}
 	}
-	
-	@SuppressWarnings("deprecation")
+
     private void regrow(Block center, int radius)
 	{
         Block toHandle;
@@ -314,13 +318,12 @@ public class EntityEventHandler implements Listener
             {
                 toHandle = center.getWorld().getBlockAt(center.getX() + x, center.getY() + 2, center.getZ() + z);
                 while(toHandle.getType() == Material.AIR && toHandle.getY() > center.getY() - 4) toHandle = toHandle.getRelative(BlockFace.DOWN);
-                if (toHandle.getType() == Material.GRASS) // Block is grass
+                if (toHandle.getType() == Material.GRASS_BLOCK) // Block is grass
                 {
                     Block aboveBlock = toHandle.getRelative(BlockFace.UP);
                     if(aboveBlock.getType() == Material.AIR)
                     {
-                    	aboveBlock.setType(Material.LONG_GRASS);
-                        aboveBlock.setData((byte) 1);  //data == 1 means live grass instead of dead shrub
+                    	aboveBlock.setType(Material.TALL_GRASS);
                     }
                     continue;
                 }

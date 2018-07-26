@@ -1,3 +1,21 @@
+/*
+    PopulationDensity Server Plugin for Minecraft
+    Copyright (C) 2011 Ryan Hamshire
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package me.ryanhamshire.PopulationDensity;
 
 import java.util.Arrays;
@@ -107,8 +125,7 @@ public class MonitorPerformanceTask implements Runnable
 	    
 	    PopulationDensity.serverTicksPerSecond = tps;
 	}
-    
-    @SuppressWarnings("deprecation")
+
     static void thinEntities()
     {
         //thinnable entity types
@@ -124,6 +141,10 @@ public class MonitorPerformanceTask implements Runnable
             EntityType.RABBIT,
             EntityType.MUSHROOM_COW
         ));
+
+        if (PopulationDensity.instance.thinIronGolemsToo) {
+            thinnableAnimals.add(EntityType.IRON_GOLEM);
+        }
         
         int totalEntities = 0;
         int totalRemoved = 0;
@@ -232,9 +253,9 @@ public class MonitorPerformanceTask implements Runnable
                             {
                                 Block block = entity.getLocation().getBlock();
                                 Material blockType = block.getType();
-                                if(blockType == Material.LONG_GRASS || blockType == Material.AIR)
+                                if(blockType == Material.TALL_GRASS || blockType == Material.AIR)
                                 {
-                                    block.setTypeIdAndData(31, (byte)0, false);  //dead bush
+                                    block.setType(Material.DEAD_BUSH);
                                 }
                             }
                         }
