@@ -120,18 +120,14 @@ public class EntityEventHandler implements Listener
 	{
 		//respect config option
 		if(!PopulationDensity.instance.regrowTrees) return;
-		
-		//only care about dropped items
-		Entity entity = event.getEntity();
-		if(entity.getType() != EntityType.DROPPED_ITEM) return;
-		
-		if(!(entity instanceof Item)) return;
+
+		Item entity = event.getEntity();
 		
 		//get info about the dropped item
-		ItemStack item = ((Item)entity).getItemStack();
+		ItemStack item = event.getEntity().getItemStack();
 		
 		//only care about saplings
-		if(saplings.contains(item.getType())) return;
+		if(!saplings.contains(item.getType())) return;
 		
 		//only care about the newest region
 		if(!PopulationDensity.instance.dataStore.getOpenRegion().equals(RegionCoordinates.fromLocation(entity.getLocation()))) return;
