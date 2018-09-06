@@ -1284,7 +1284,7 @@ public class PopulationDensity extends JavaPlugin
 	
 	//scans the open region for resources and may close the region (and open a new one) if accessible resources are low
 	//may repeat itself if the regions it opens are also not acceptably rich in resources
-	@SuppressWarnings("deprecation")
+	//TODO: use Paper API to get chunks async (with fallback to spigot/CB)
     public void scanRegion(RegionCoordinates region, boolean openNewRegions)
 	{						
 		AddLogEntry("Examining available resources in region \"" + region.toString() + "\"...");						
@@ -1306,64 +1306,24 @@ public class PopulationDensity extends JavaPlugin
                 snapshots[x][z] = null;
             }
         }
-		
-		boolean snapshotIncomplete;
-		do
+
+		for(int x = 0; x < snapshots.length; x++)
 		{
-			snapshotIncomplete = false;
-		
-			for(int x = 0; x < snapshots.length; x++)
+			for (int z = 0; z < snapshots[0].length; z++)
 			{
-				for(int z = 0; z < snapshots[0].length; z++)
+				//skip chunks that we already have snapshots for
+				if (snapshots[x][z] != null) continue;
+
+				//get the chunk, load it, generate it if necessary
+				Chunk chunk = ManagedWorld.getChunkAt(x + lesserBoundaryChunk.getX(), z + lesserBoundaryChunk.getZ());
+				if (chunk.isLoaded() || chunk.load(true))
 				{
-				    //skip chunks that we already have snapshots for
-				    if(snapshots[x][z] != null) continue;
-				    
-					//get the chunk, load it, generate it if necessary
-					Chunk chunk = ManagedWorld.getChunkAt(x + lesserBoundaryChunk.getX(), z + lesserBoundaryChunk.getZ());
-					if(chunk.isLoaded() || chunk.load(true))
-					{
-    					//take a snapshot
-    					ChunkSnapshot snapshot = chunk.getChunkSnapshot();
-
-    					//verify the snapshot by finding something that's not air
-    					boolean foundNonAir = false;
-    					for(int y = 0; y < ManagedWorld.getMaxHeight(); y++)
-    					{
-    						//if we find something, save the snapshot to the snapshot array
-    						if(snapshot.getBlockType(0, y, 0) != Material.AIR)
-    						{
-    							foundNonAir = true;
-    							snapshots[x][z] = snapshot;
-    							break;
-    						}
-    					}
-
-    					//otherwise, plan to repeat this process again after sleeping a bit
-    					if(!foundNonAir)
-    					{
-    						snapshotIncomplete = true;
-    					}
-					}
-					else
-					{
-					    snapshotIncomplete = true;
-					}
+					//take a snapshot
+					ChunkSnapshot snapshot = chunk.getChunkSnapshot();
+					snapshots[x][z] = snapshot;
 				}
 			}
-			
-			//if at least one snapshot was all air, sleep a second to let the chunk loader/generator
-			//catch up, and then try again
-			if(snapshotIncomplete)
-			{
-				try 
-				{
-					Thread.sleep(1000);
-				} 			
-				catch (InterruptedException e) { } 				
-			}
-			
-		}while(snapshotIncomplete);
+		}
 		
 		//create a new task with this information, which will more completely scan the content of all the snapshots
 		ScanRegionTask task = new ScanRegionTask(snapshots, openNewRegions);
