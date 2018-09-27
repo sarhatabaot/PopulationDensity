@@ -89,12 +89,7 @@ public class WorldEventHandler implements Listener
             {
                 PopulationDensity.instance.dataStore.AddRegionPost(region);
             }
-            catch (ChunkLoadException e)  //this should never happen, because the chunk is loaded (why else would onChunkLoad() be invoked?)
-            //Then why are you eating it? - RoboMWM
-            {
-                PopulationDensity.instance.getLogger().info("Was unable to build a post. Do not fret as we'll try again when the chunk is loaded again - but, if you wish to report this, please include the ''entire'' log, not just this error.");
-                e.printStackTrace();
-            }
+            catch (ChunkLoadException ignored){}  //this should never happen, because the chunk is loaded (why else would onChunkLoad() be invoked?)
         }
     }
 
