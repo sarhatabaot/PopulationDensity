@@ -22,9 +22,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.WordUtils;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -518,6 +520,19 @@ public class PopulationDensity extends JavaPlugin
                 }
             }
         }
+        try
+		{
+			Metrics metrics = new Metrics(this);
+			metrics.addCustomChart(new Metrics.SimplePie("bukkit_impl", new Callable<String>()
+			{
+				@Override
+				public String call() throws Exception
+				{
+					return getServer().getVersion().split("-")[1];
+				}
+			}));
+		}
+		catch (Throwable ignored){}
 	}
 
 	String getRegionNameError(String name, boolean console)
