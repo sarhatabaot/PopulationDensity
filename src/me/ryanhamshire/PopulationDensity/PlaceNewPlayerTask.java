@@ -15,8 +15,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
- package me.ryanhamshire.PopulationDensity;
+
+package me.ryanhamshire.PopulationDensity;
 
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -24,20 +24,20 @@ import org.bukkit.scheduler.BukkitRunnable;
 //created during new player login to teleport that player to his home region after a short delay
 class PlaceNewPlayerTask extends BukkitRunnable
 {
-	private PopulationDensity instance;
-	private Player player;
-	private RegionCoordinates region;
-	
-	public PlaceNewPlayerTask(Player player, RegionCoordinates region, PopulationDensity plugin)
-	{
-		this.player = player;
-		this.region = region;
-		this.instance = plugin;
-	}
-	
-	@Override
-	public void run()
-	{
-		instance.TeleportPlayerToRegion(player, region, 0, instance.config_launchAndDropNewPlayers);
-	}
+    private PopulationDensity instance;
+    private Player player;
+    private RegionCoordinates region;
+
+    public PlaceNewPlayerTask(Player player, RegionCoordinates region, PopulationDensity plugin)
+    {
+        this.player = player;
+        this.region = region;
+        this.instance = plugin;
+    }
+
+    @Override
+    public void run()
+    {
+        instance.TeleportPlayerToRegion(player, region, 0, instance.config_launchAndDropNewPlayers);
+    }
 }

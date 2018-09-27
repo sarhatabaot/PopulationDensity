@@ -15,7 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
+
 package me.ryanhamshire.PopulationDensity;
 
 import org.bukkit.ChatColor;
@@ -23,28 +23,28 @@ import org.bukkit.entity.Player;
 
 //sends a message to a player
 //used to send delayed messages, for example help text triggered by a player's chat
-class SendPlayerMessageTask implements Runnable 
+class SendPlayerMessageTask implements Runnable
 {
-	private Player player;
-	private ChatColor color;
-	private String message;
-	
-	public SendPlayerMessageTask(Player player, ChatColor color, String message)
-	{
-		this.player = player;
-		this.color = color;
-		this.message = message;
-	}
+    private Player player;
+    private ChatColor color;
+    private String message;
 
-	@Override
-	public void run()
-	{
-		if(player == null)
-		{
-		    PopulationDensity.AddLogEntry(color + message);
-		    return;
-		}
-	    
-		PopulationDensity.sendMessage(this.player, this.color, this.message);
-	}	
+    public SendPlayerMessageTask(Player player, ChatColor color, String message)
+    {
+        this.player = player;
+        this.color = color;
+        this.message = message;
+    }
+
+    @Override
+    public void run()
+    {
+        if (player == null)
+        {
+            PopulationDensity.AddLogEntry(color + message);
+            return;
+        }
+
+        PopulationDensity.sendMessage(this.player, this.color, this.message);
+    }
 }

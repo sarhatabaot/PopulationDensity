@@ -29,6 +29,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
+
 import java.util.HashSet;
 import java.util.UUID;
 
@@ -37,7 +38,8 @@ import java.util.UUID;
  * All the events and logic to perform this stuff is all encapsulated here,
  * in case users want to disable the entirety of this thing
  */
-public class DropShipTeleporter implements Listener {
+public class DropShipTeleporter implements Listener
+{
     PopulationDensity instance;
 
     public DropShipTeleporter(PopulationDensity populationDensity)
@@ -48,7 +50,7 @@ public class DropShipTeleporter implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onPlayerToggleFlight(PlayerToggleFlightEvent event)
     {
-        if(isFallDamageImmune(event.getPlayer()))
+        if (isFallDamageImmune(event.getPlayer()))
         {
             event.setCancelled(true);
         }
@@ -57,9 +59,9 @@ public class DropShipTeleporter implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
     public void onEntityToggleFlight(EntityToggleGlideEvent event)
     {
-        if(event.getEntityType() != EntityType.PLAYER) return;
+        if (event.getEntityType() != EntityType.PLAYER) return;
 
-        if(isFallDamageImmune((Player)event.getEntity()))
+        if (isFallDamageImmune((Player)event.getEntity()))
         {
             event.setCancelled(true);
         }
@@ -70,16 +72,16 @@ public class DropShipTeleporter implements Listener {
     {
         Entity entity = event.getEntity();
         //when an entity has fall damage immunity, it lasts for only ONE fall damage check
-        if(event.getCause() == EntityDamageEvent.DamageCause.FALL)
+        if (event.getCause() == EntityDamageEvent.DamageCause.FALL)
         {
-            if(isFallDamageImmune(entity))
+            if (isFallDamageImmune(entity))
             {
                 event.setCancelled(true);
                 removeFallDamageImmunity(entity);
-                if(entity.getType() == EntityType.PLAYER)
+                if (entity.getType() == EntityType.PLAYER)
                 {
                     Player player = (Player)entity;
-                    if(!player.hasPermission("populationdensity.teleportanywhere"))
+                    if (!player.hasPermission("populationdensity.teleportanywhere"))
                     {
                         player.getWorld().createExplosion(player.getLocation(), 0);
                     }
@@ -89,12 +91,13 @@ public class DropShipTeleporter implements Listener {
     }
 
     HashSet<UUID> fallImmunityList = new HashSet<UUID>();
+
     void makeEntityFallDamageImmune(LivingEntity entity)
     {
-        if(entity.getType() == EntityType.PLAYER)
+        if (entity.getType() == EntityType.PLAYER)
         {
-            Player player = (Player) entity;
-            if(player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) return;
+            Player player = (Player)entity;
+            if (player.getGameMode() == GameMode.CREATIVE || player.getGameMode() == GameMode.SPECTATOR) return;
             player.setGliding(false);
         }
         fallImmunityList.add(entity.getUniqueId());

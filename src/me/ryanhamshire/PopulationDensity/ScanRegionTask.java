@@ -18,46 +18,47 @@
 
 package me.ryanhamshire.PopulationDensity;
 
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
 
-public class ScanRegionTask extends Thread 
-{
-	private ChunkSnapshot[][] chunks;
-	private boolean openNewRegions;
-	
-	private final int CHUNK_SIZE = 16;
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
-	public ScanRegionTask(ChunkSnapshot chunks[][], boolean openNewRegions)
-	{
-		this.chunks = chunks;
-		this.openNewRegions = openNewRegions;
-	}
-	
-	private class Position
-	{
-		public int x;
-		public int y;
-		public int z;
-		
-		public Position(int x, int y, int z)
-		{
-			this.x = x;
-			this.y = y;
-			this.z = z;
-		}
-		
-		public String toString()
-		{
-			return this.x + " " + this.y + " " + this.z;					
-		}
-	}
-	
-	@Override
-	public void run() {
+public class ScanRegionTask extends Thread
+{
+    private ChunkSnapshot[][] chunks;
+    private boolean openNewRegions;
+
+    private final int CHUNK_SIZE = 16;
+
+    public ScanRegionTask(ChunkSnapshot chunks[][], boolean openNewRegions)
+    {
+        this.chunks = chunks;
+        this.openNewRegions = openNewRegions;
+    }
+
+    private class Position
+    {
+        public int x;
+        public int y;
+        public int z;
+
+        public Position(int x, int y, int z)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+
+        public String toString()
+        {
+            return this.x + " " + this.y + " " + this.z;
+        }
+    }
+
+    @Override
+    public void run()
+    {
         ArrayList<String> logEntries = new ArrayList<String>();
 
         //initialize report content
@@ -83,10 +84,13 @@ public class ScanRegionTask extends Thread
 
         //find a reasonable start position
         Position currentPosition = null;
-        for (x = 0; x < examined.length && currentPosition == null; x++) {
-            for (z = 0; z < examined[0][0].length && currentPosition == null; z++) {
+        for (x = 0; x < examined.length && currentPosition == null; x++)
+        {
+            for (z = 0; z < examined[0][0].length && currentPosition == null; z++)
+            {
                 Position position = new Position(x, maxHeight - 1, z);
-                if (this.getMaterialAt(position) == Material.AIR) {
+                if (this.getMaterialAt(position) == Material.AIR)
+                {
                     currentPosition = position;
                 }
             }
@@ -100,10 +104,13 @@ public class ScanRegionTask extends Thread
         ConcurrentLinkedQueue<Position> unexaminedQueue = new ConcurrentLinkedQueue<Position>();
 
         //mark start position as examined
-        try {
+        try
+        {
             assert currentPosition != null;
             examined[currentPosition.x][currentPosition.y][currentPosition.z] = true;
-        } catch (ArrayIndexOutOfBoundsException e) {
+        }
+        catch (ArrayIndexOutOfBoundsException e)
+        {
             logEntries.add("Unexpected Exception: " + e.toString());
         }
 
@@ -111,7 +118,8 @@ public class ScanRegionTask extends Thread
         unexaminedQueue.add(currentPosition);
 
         //as long as there are positions in the queue, keep going
-        while (!unexaminedQueue.isEmpty()) {
+        while (!unexaminedQueue.isEmpty())
+        {
             //dequeue a block
             currentPosition = unexaminedQueue.remove();
 
@@ -122,7 +130,8 @@ public class ScanRegionTask extends Thread
             //in that case, just move on to the next item in the queue
             if (material == null || currentPosition.y < min_y) continue;
 
-            switch (material) {
+            switch (material)
+            {
                 // Check if it's a pass-through-able block
                 case AIR:
                 case CAVE_AIR: // yes this is a thing now in 1.13 ... don't ask me y...
@@ -141,7 +150,8 @@ public class ScanRegionTask extends Thread
                 case DARK_OAK_TRAPDOOR:
                 case IRON_DOOR:
                 case IRON_TRAPDOOR:
-                case LADDER: {
+                case LADDER:
+                {
                     //make a list of adjacent blocks
                     ConcurrentLinkedQueue<Position> adjacentPositionQueue = new ConcurrentLinkedQueue<Position>();
 
@@ -164,12 +174,15 @@ public class ScanRegionTask extends Thread
                     adjacentPositionQueue.add(new Position(currentPosition.x, currentPosition.y - 1, currentPosition.z));
 
                     //for each adjacent block
-                    while (!adjacentPositionQueue.isEmpty()) {
+                    while (!adjacentPositionQueue.isEmpty())
+                    {
                         Position adjacentPosition = adjacentPositionQueue.remove();
 
-                        try {
+                        try
+                        {
                             //if it hasn't been examined yet
-                            if (!examined[adjacentPosition.x][adjacentPosition.y][adjacentPosition.z]) {
+                            if (!examined[adjacentPosition.x][adjacentPosition.y][adjacentPosition.z])
+                            {
                                 //mark it as examined
                                 examined[adjacentPosition.x][adjacentPosition.y][adjacentPosition.z] = true;
 
@@ -179,7 +192,8 @@ public class ScanRegionTask extends Thread
                         }
 
                         //ignore any adjacent blocks which are outside the snapshots
-                        catch (ArrayIndexOutOfBoundsException e) {
+                        catch (ArrayIndexOutOfBoundsException e)
+                        {
                         }
                     }
                     break;
@@ -191,37 +205,45 @@ public class ScanRegionTask extends Thread
                 case BIRCH_LOG:
                 case JUNGLE_LOG:
                 case ACACIA_LOG:
-                case DARK_OAK_LOG: {
+                case DARK_OAK_LOG:
+                {
                     woodCount++;
                     break;
                 }
 
                 // Check if it's an ore
-                case COAL_ORE: {
+                case COAL_ORE:
+                {
                     coalCount++;
                     break;
                 }
-                case IRON_ORE: {
+                case IRON_ORE:
+                {
                     ironCount++;
                     break;
                 }
-                case GOLD_ORE: {
+                case GOLD_ORE:
+                {
                     goldCount++;
                     break;
                 }
-                case REDSTONE_ORE: {
+                case REDSTONE_ORE:
+                {
                     redstoneCount++;
                     break;
                 }
-                case LAPIS_ORE: {
+                case LAPIS_ORE:
+                {
                     lapisCount++;
                     break;
                 }
-                case EMERALD_ORE: {
+                case EMERALD_ORE:
+                {
                     emeraldCount++;
                     break;
                 }
-                case DIAMOND_ORE: {
+                case DIAMOND_ORE:
+                {
                     diamondCount++;
                     break;
                 }
@@ -313,12 +335,14 @@ public class ScanRegionTask extends Thread
                 case BRAIN_CORAL_FAN:
                 case BUBBLE_CORAL_FAN:
                 case FIRE_CORAL_FAN:
-                case HORN_CORAL_FAN: {
+                case HORN_CORAL_FAN:
+                {
                     break;
                 }
 
                 // Last but not least: if it's a player block
-                default: {
+                default:
+                {
                     playerBlocks++;
                     break;
                 }
@@ -351,16 +375,20 @@ public class ScanRegionTask extends Thread
         logEntries.add(" ");
 
         //if NOT sufficient resources for a good start
-        if (resourceScore < PopulationDensity.instance.resourceMinimum || woodCount < PopulationDensity.instance.woodMinimum || playerBlocks > 40000 * PopulationDensity.instance.densityRatio) {
-            if (resourceScore < PopulationDensity.instance.resourceMinimum || woodCount < PopulationDensity.instance.woodMinimum) {
+        if (resourceScore < PopulationDensity.instance.resourceMinimum || woodCount < PopulationDensity.instance.woodMinimum || playerBlocks > 40000 * PopulationDensity.instance.densityRatio)
+        {
+            if (resourceScore < PopulationDensity.instance.resourceMinimum || woodCount < PopulationDensity.instance.woodMinimum)
+            {
                 logEntries.add("Summary: Insufficient near-surface resources to support new players.");
-            } else if (playerBlocks > 40000 * PopulationDensity.instance.densityRatio) {
+            } else if (playerBlocks > 40000 * PopulationDensity.instance.densityRatio)
+            {
                 logEntries.add("Summary: Region seems overcrowded.");
             }
         }
 
         //otherwise
-        else {
+        else
+        {
             logEntries.add("Summary: Looks good! This region is suitable for new players.");
             openNewRegions = false;
         }
@@ -371,19 +399,19 @@ public class ScanRegionTask extends Thread
     }
 
     private Material getMaterialAt(Position position)
-	{
-		Material material = null;
-		
-		int chunkx = position.x / 16;
-		int chunkz = position.z / 16;
-		
-		try
-		{
-			ChunkSnapshot snapshot = this.chunks[chunkx][chunkz];
-			material = snapshot.getBlockType(position.x % 16, position.y, position.z % 16);
-		}
-		catch(IndexOutOfBoundsException e) { }
-		
-		return material;
-	}	
+    {
+        Material material = null;
+
+        int chunkx = position.x / 16;
+        int chunkz = position.z / 16;
+
+        try
+        {
+            ChunkSnapshot snapshot = this.chunks[chunkx][chunkz];
+            material = snapshot.getBlockType(position.x % 16, position.y, position.z % 16);
+        }
+        catch (IndexOutOfBoundsException e) { }
+
+        return material;
+    }
 }

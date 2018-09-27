@@ -22,20 +22,20 @@
         </repository>
     </repositories>
     <build>
-    <!--Maintain existing structure (as much as possible)-->
+        <!--Maintain existing structure (as much as possible)-->
         <sourceDirectory>${project.basedir}/src</sourceDirectory>
         <!--currently in same folder as source files...-->
         <testSourceDirectory>${project.basedir}/tests/java</testSourceDirectory>
         <testResources>
-          <testResource>
-            <directory>${project.basedir}/tests/resources</directory>
-          </testResource>
+            <testResource>
+                <directory>${project.basedir}/tests/resources</directory>
+            </testResource>
         </testResources>
         <finalName>${project.name}</finalName>
         <resources>
             <resource>
-            <!-- Use plugin.yml in root directory-->
-            <!-- This can also automatically update plugin.yml version from pom, if you use ${project.version} as version number-->
+                <!-- Use plugin.yml in root directory-->
+                <!-- This can also automatically update plugin.yml version from pom, if you use ${project.version} as version number-->
                 <directory>${basedir}</directory>
                 <filtering>true</filtering>
                 <includes>
@@ -49,6 +49,12 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                    <artifactSet>
+                        <includes>
+                            <include>org.bstats:bstats-bukkit</include>
+                        </includes>
+                    </artifactSet>
                     <minimizeJar>true</minimizeJar>
                     <relocations>
                         <relocation>

@@ -21,7 +21,7 @@ package me.ryanhamshire.PopulationDensity;
 public class RegionNameException extends Exception
 {
     private static final long serialVersionUID = 1L;
-    
+
     public RegionNameException(String error)
     {
         super(error);
