@@ -643,7 +643,7 @@ public class PopulationDensity extends JavaPlugin
 
             @SuppressWarnings("deprecation")
             Player targetPlayer = this.getServer().getPlayerExact(args[0]);
-            if (targetPlayer != null)
+            if (targetPlayer != null && player.canSee(targetPlayer))
             {
                 PlayerData targetPlayerData = this.dataStore.getPlayerData(targetPlayer);
                 if (playerData.inviter != null && playerData.inviter.getName().equals(targetPlayer.getName()))
@@ -825,7 +825,7 @@ public class PopulationDensity extends JavaPlugin
             //send a notification to the invitee, if he's available
             @SuppressWarnings("deprecation")
             Player invitee = this.getServer().getPlayer(args[0]);
-            if (invitee != null)
+            if (invitee != null && player.canSee(invitee))
             {
                 playerData = this.dataStore.getPlayerData(invitee);
                 if (playerData.inviter == player)
@@ -950,28 +950,6 @@ public class PopulationDensity extends JavaPlugin
 
                 return true;
             }
-        } else if (cmd.getName().equalsIgnoreCase("randomregion") && player != null)
-        {
-            CanTeleportResult result = this.playerCanTeleport(player, false);
-            if (!result.canTeleport) return true;
-
-            RegionCoordinates randomRegion = this.dataStore.getRandomRegion(RegionCoordinates.fromLocation(player.getLocation()));
-
-            if (randomRegion == null)
-            {
-                PopulationDensity.sendMessage(player, TextMode.Err, Messages.NoMoreRegions);
-            } else
-            {
-                if (result.nearPost && this.launchPlayer(player))
-                {
-                    this.TeleportPlayer(player, randomRegion, 1);
-                } else
-                {
-                    this.TeleportPlayer(player, randomRegion, 0);
-                }
-            }
-
-            return true;
         } else if (cmd.getName().equalsIgnoreCase("thinentities"))
         {
             if (player != null)
