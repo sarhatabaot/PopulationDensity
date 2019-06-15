@@ -48,16 +48,7 @@ public class DropShipTeleporter implements Listener
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    public void onPlayerToggleFlight(PlayerToggleFlightEvent event)
-    {
-        if (isFallDamageImmune(event.getPlayer()))
-        {
-            event.setCancelled(true);
-        }
-    }
-
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-    public void onEntityToggleFlight(EntityToggleGlideEvent event)
+    public void onEntityToggleGlide(EntityToggleGlideEvent event)
     {
         if (event.getEntityType() != EntityType.PLAYER) return;
 
