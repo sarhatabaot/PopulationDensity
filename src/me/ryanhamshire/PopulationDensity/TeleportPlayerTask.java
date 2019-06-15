@@ -76,14 +76,7 @@ class TeleportPlayerTask extends BukkitRunnable
                     if (tamer != null && player.getUniqueId().equals(tamer.getUniqueId()))
                     {
                         EntityType type = entity.getType();
-                        if (type == EntityType.OCELOT)
-                        {
-                            Ocelot cat = (Ocelot)entity;
-                            if (cat.isSitting())
-                            {
-                                continue;
-                            }
-                        } else if (type == EntityType.WOLF)
+                        if (type == EntityType.WOLF)
                         {
                             Wolf dog = (Wolf)entity;
                             if (dog.isSitting())
