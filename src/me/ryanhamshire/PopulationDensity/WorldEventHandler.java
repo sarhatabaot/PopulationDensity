@@ -191,7 +191,8 @@ public class WorldEventHandler implements Listener
                     regionCenter.getBlockZ() >= lesserCorner.getBlockZ() && regionCenter.getBlockZ() <= greaterCorner.getBlockZ())
             {
                 //don't unload the chunk
-                event.setCancelled(true);
+                chunk.getWorld().loadChunk(chunk);
+                chunk.setForceLoaded(true);
             }
         }
     }
