@@ -21,6 +21,7 @@ package me.ryanhamshire.PopulationDensity;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -242,7 +243,7 @@ public class BlockEventHandler implements Listener
         Player player = damageEvent.getPlayer();
 
         Block block = damageEvent.getBlock();
-        if (player == null || (block.getType() != Material.WALL_SIGN && block.getType() != Material.SIGN)) return;
+        if (player == null || (!Tag.WALL_SIGNS.isTagged(block.getType()) && !Tag.SIGNS.isTagged(block.getType()))) return;
 
         //if the player is not in managed world, do nothing
         if (!player.getWorld().equals(PopulationDensity.ManagedWorld)) return;

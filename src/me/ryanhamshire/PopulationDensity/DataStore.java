@@ -25,6 +25,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
@@ -508,7 +509,7 @@ public class DataStore implements TabCompleter
                 blockType == Material.VINE
         ));
 
-        if (blockType == Material.SIGN)
+        if (Tag.SIGNS.isTagged(blockType))
         {
             y -= 4;
         }
@@ -536,7 +537,7 @@ public class DataStore implements TabCompleter
                 for (int y1 = y + 1; y1 <= y + 5; y1++)
                 {
                     Block block = PopulationDensity.ManagedWorld.getBlockAt(x1, y1, z1);
-                    if (block.getType() == Material.SIGN || block.getType() == Material.WALL_SIGN)
+                    if (Tag.SIGNS.isTagged(block.getType()) || Tag.WALL_SIGNS.isTagged(block.getType()))
                         block.setType(Material.AIR);
                 }
             }
@@ -670,7 +671,7 @@ public class DataStore implements TabCompleter
     private void setSign(int x, int y, int z, BlockFace blockFace, String[] lines, String... replacements)
     {
         Block block = PopulationDensity.ManagedWorld.getBlockAt(x, y, z);
-        block.setType(Material.SIGN);
+        block.setType(Material.OAK_SIGN);
 
         org.bukkit.block.data.type.Sign wall = (org.bukkit.block.data.type.Sign)block.getBlockData();
         wall.setRotation(blockFace);
@@ -694,7 +695,7 @@ public class DataStore implements TabCompleter
     private void setWallSign(int x, int y, int z, BlockFace blockFace, String[] lines, String... replacements)
     {
         Block block = PopulationDensity.ManagedWorld.getBlockAt(x, y, z);
-        block.setType(Material.WALL_SIGN);
+        block.setType(Material.OAK_WALL_SIGN);
 
         org.bukkit.block.data.type.WallSign wall = (org.bukkit.block.data.type.WallSign)block.getBlockData();
         wall.setFacing(blockFace);
